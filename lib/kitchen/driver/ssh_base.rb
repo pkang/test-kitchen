@@ -68,6 +68,8 @@ module Kitchen
 
       # (see Base#converge)
       def converge(state) # rubocop:disable Metrics/AbcSize
+        FileUtils.rm_f(File.join(config[:test_base_path], 'nodes', "#{instance.name}.json"))
+
         provisioner = instance.provisioner
         provisioner.create_sandbox
         sandbox_dirs = Dir.glob("#{provisioner.sandbox_path}/*")
@@ -80,6 +82,8 @@ module Kitchen
           debug("Transfer complete")
           conn.execute(env_cmd(provisioner.prepare_command))
           conn.execute(env_cmd(provisioner.run_command))
+          # TODO pk: only works with ssh
+          conn.download(File.join(provisioner[:root_path], 'nodes', "#{instance.name}.json"), File.join(config[:test_base_path], 'nodes'))
         end
       rescue Kitchen::Transport::TransportFailed => ex
         raise ActionFailed, ex.message

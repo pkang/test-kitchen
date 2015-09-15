@@ -146,6 +146,15 @@ module Kitchen
           raise SshFailed, "SCP upload failed (#{ex.message})"
         end
 
+        # TODO pk: for now, used only in `driver/ssh_base`
+        def download(remote, local)
+          session.scp.download!(remote, local) do |_ch, name, sent, total|
+            logger.debug("Downloaded #{name} (#{total} bytes)") if sent == total
+          end
+        rescue Net::SSH::Exception => ex
+          raise SshFailed, "SCP download failed (#{ex.message})"
+        end
+
         # (see Base::Connection#wait_until_ready)
         def wait_until_ready
           delay = 3
